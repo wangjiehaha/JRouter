@@ -1,0 +1,6 @@
+rootProject.name='JRouter'
+include ':app'
+include ':JRouter-annotation'
+include ':JRouter-compiler'
+include ':JRouter-api'
+include ':JRouter-api'
