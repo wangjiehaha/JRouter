@@ -1,4 +1,4 @@
-package com.jj.haha.jrouter_compiler;
+package com.jj.haha.jrouter.compiler;
 
 import com.google.auto.service.AutoService;
 import com.jj.haha.jrouter.annotation.Const;

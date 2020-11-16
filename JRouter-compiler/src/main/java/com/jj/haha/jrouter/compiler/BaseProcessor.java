@@ -1,4 +1,4 @@
-package com.jj.haha.jrouter_compiler;
+package com.jj.haha.jrouter.compiler;
 
 import com.jj.haha.jrouter.annotation.Const;
 import com.squareup.javapoet.ClassName;
