@@ -1,5 +1,13 @@
 apply plugin: 'groovy'
 
+apply from: "../local.repository.gradle"
+uploadArchives{
+    repositories.mavenDeployer{
+        pom.artifactId = "plugin"
+        pom.version = "1.0.0"
+    }
+}
+
 dependencies {
     implementation gradleApi()
     implementation localGroovy()

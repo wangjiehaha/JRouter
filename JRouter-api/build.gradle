@@ -2,6 +2,14 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
+apply from: "../local.repository.gradle"
+uploadArchives{
+    repositories.mavenDeployer{
+        pom.artifactId = "api"
+        pom.version = "1.0.0"
+    }
+}
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"

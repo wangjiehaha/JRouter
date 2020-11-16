@@ -1,5 +1,13 @@
 apply plugin: 'java-library'
 
+apply from: "../local.repository.gradle"
+uploadArchives{
+    repositories.mavenDeployer{
+        pom.artifactId = "annotation"
+        pom.version = "1.0.0"
+    }
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 

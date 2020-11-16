@@ -1,0 +1,8 @@
+apply plugin: 'maven'
+
+uploadArchives{
+    repositories.mavenDeployer{
+        repository(url:"file://E://MyRepository/")
+        pom.groupId = "com.jj.haha"
+    }
+}
