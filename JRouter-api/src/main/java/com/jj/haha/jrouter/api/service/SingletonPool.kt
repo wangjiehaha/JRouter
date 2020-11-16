@@ -12,6 +12,7 @@ object SingletonPool {
 
     @JvmStatic
     @Throws(Exception::class)
+    @Suppress("UNCHECKED_CAST")
     operator fun <I, T : I?> get(clazz: Class<I>?, factory: IFactory?): T? {
         var factoryTemp = factory
         if (clazz == null) {

@@ -28,7 +28,6 @@ abstract class LazyInitHelper(private val mTag: String) {
         if (!mHasInit) {
             synchronized(this) {
                 if (!mHasInit) {
-                    val ts: Long = 0
                     try {
                         doInit()
                         mHasInit = true
