@@ -4,7 +4,6 @@ import com.google.auto.service.AutoService;
 import com.jj.haha.jrouter.annotation.Const;
 import com.jj.haha.jrouter.annotation.RouterService;
 import com.jj.haha.jrouter.annotation.ServiceImpl;
-import com.sun.tools.javac.code.Symbol;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,16 +42,11 @@ public class ServiceAnnotationProcessor extends BaseProcessor {
     private void processAnnotations(RoundEnvironment env) {
         System.out.println("=========== Begin collect Annotations ==========");
         for (Element element : env.getElementsAnnotatedWith(RouterService.class)) {
-            if (!(element instanceof Symbol.ClassSymbol)) {
-                continue;
-            }
-
-            Symbol.ClassSymbol cls = (Symbol.ClassSymbol) element;
             if (mHash == null) {
-                mHash = hash(cls.className());
+                mHash = hash(getClassName(element.asType()));
             }
 
-            RouterService service = cls.getAnnotation(RouterService.class);
+            RouterService service = element.getAnnotation(RouterService.class);
             if (service == null) {
                 continue;
             }
@@ -60,7 +54,7 @@ public class ServiceAnnotationProcessor extends BaseProcessor {
             List<? extends TypeMirror> typeMirrors = getInterface(service);
             String[] keys = service.key();
 
-            String implementationName = cls.className();
+            String implementationName = getClassName(element.asType());
             boolean singleton = service.singleton();
             final boolean defaultImpl = service.defaultImpl();
             final boolean canRegister = service.register();
@@ -70,8 +64,8 @@ public class ServiceAnnotationProcessor extends BaseProcessor {
                     if (mirror == null) {
                         continue;
                     }
-                    if (!isConcreteSubType((Element) cls, mirror)) {
-                        String msg = cls.className() + " no implementation annotations " + RouterService.class.getName()
+                    if (!isConcreteSubType(element, mirror)) {
+                        String msg = getClassName(element.asType()) + " no implementation annotations " + RouterService.class.getName()
                                 + " annotated interface " + mirror.toString();
                         throw new RuntimeException(msg);
                     }

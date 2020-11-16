@@ -7,7 +7,6 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import com.sun.tools.javac.code.Symbol;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -97,16 +96,6 @@ public abstract class BaseProcessor extends AbstractProcessor {
         } catch (NoSuchAlgorithmException e) {
             return Integer.toHexString(str.hashCode());
         }
-    }
-
-    public CodeBlock buildHandler(boolean isActivity, Symbol.ClassSymbol cls) {
-        CodeBlock.Builder b = CodeBlock.builder();
-        if (isActivity) {
-            b.add("$S", cls.className());
-        } else {
-            b.add("new $T()", cls);
-        }
-        return b.build();
     }
 
     public class ServiceInitClassBuilder {
