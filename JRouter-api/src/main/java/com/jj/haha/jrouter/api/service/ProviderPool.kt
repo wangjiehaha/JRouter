@@ -15,6 +15,7 @@ object ProviderPool {
     private val NOT_FOUND =
         ProviderPool::class.java.declaredMethods[0]
 
+    @Suppress("UNCHECKED_CAST")
     fun <T> create(clazz: Class<T>?): T? {
         if (clazz == null) {
             return null
