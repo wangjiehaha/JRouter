@@ -26,6 +26,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class ServiceLoader<I> {
 
     private static final Map<Class, ServiceLoader> SERVICES = new HashMap<>();
+    private HashMap<String, ServiceImpl> mMap = new HashMap<>();
+    private final CopyOnWriteArrayList<String> unRegisterService = new CopyOnWriteArrayList<>();
+    private final String mInterfaceName;
 
     private static final LazyInitHelper sInitHelper = new LazyInitHelper("ServiceLoader") {
         @Override
@@ -87,14 +90,6 @@ public class ServiceLoader<I> {
         }
         return service;
     }
-
-    /**
-     * key --> class name
-     */
-    private HashMap<String, ServiceImpl> mMap = new HashMap<>();
-    private final CopyOnWriteArrayList<String> unRegisterService = new CopyOnWriteArrayList<>();
-
-    private final String mInterfaceName;
 
     private ServiceLoader(Class interfaceClass) {
         if (interfaceClass == null) {
@@ -212,7 +207,11 @@ public class ServiceLoader<I> {
         if (unRegisterService.contains(key)) {
             return null;
         }
-        return (Class<T>) mMap.get(key).getImplementationClazz();
+        ServiceImpl impl = mMap.get(key);
+        if (impl != null) {
+            return (Class<T>) impl.getImplementationClazz();
+        }
+        return null;
     }
 
     /**
@@ -252,7 +251,9 @@ public class ServiceLoader<I> {
                 if (factory == null) {
                     factory = RouterComponents.INSTANCE.getDefaultFactory();
                 }
-                return factory.create(clazz);
+                if (factory != null) {
+                    return factory.create(clazz);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
