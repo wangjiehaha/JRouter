@@ -16,13 +16,19 @@ import java.util.List;
 public class Router {
 
     private final static String TAG = Router.class.getSimpleName();
+    private static Context appContext;
+
+    public static Context getAppContext(){
+        return appContext;
+    }
 
     /**
      * 此初始化方法的调用不是必须的。
      * 使用时会按需初始化；但也可以提前调用并初始化，使用时会等待初始化完成。
      * 本方法线程安全。
      */
-    public static void lazyInit() {
+    public static void lazyInit(Context context) {
+        appContext = context.getApplicationContext();
         ServiceLoader.lazyInit();
     }
 
