@@ -12,6 +12,12 @@ import com.jj.haha.jrouter.api.lib.BinderWrapper
 import java.util.concurrent.ConcurrentHashMap
 
 class DispatcherProvider: ContentProvider() {
+
+    companion object {
+        val PROJECTION_MAIN = Array(1){"main"}
+        const val URI_SUFFIX = "jrouter.api.lib.dispatcher"
+    }
+
     override fun insert(p0: Uri, p1: ContentValues?): Uri? {
         return null
     }

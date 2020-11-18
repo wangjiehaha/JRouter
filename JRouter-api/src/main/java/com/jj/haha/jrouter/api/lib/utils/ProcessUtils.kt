@@ -58,7 +58,7 @@ object ProcessUtils {
 
     private fun getProcessNameImpl(context: Context): String? { // get by ams
         val manager =
-            context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager?
                 ?: return null
         val processes =
             manager.runningAppProcesses
