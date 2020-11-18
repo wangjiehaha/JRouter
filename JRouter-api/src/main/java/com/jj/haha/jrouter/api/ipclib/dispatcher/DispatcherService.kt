@@ -1,13 +1,11 @@
-package com.jj.haha.jrouter.api.lib.dispatcher
+package com.jj.haha.jrouter.api.ipclib.dispatcher
 
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.os.RemoteException
-import android.text.TextUtils
-import android.util.Log
 import com.jj.haha.jrouter.api.*
-import com.jj.haha.jrouter.api.lib.BinderWrapper
+import com.jj.haha.jrouter.api.ipclib.BinderWrapper
 
 class DispatcherService : Service() {
     companion object {

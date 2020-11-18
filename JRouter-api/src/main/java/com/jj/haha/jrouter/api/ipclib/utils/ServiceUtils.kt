@@ -1,4 +1,4 @@
-package com.jj.haha.jrouter.api.lib.utils
+package com.jj.haha.jrouter.api.ipclib.utils
 
 import android.content.Context
 import android.content.Intent

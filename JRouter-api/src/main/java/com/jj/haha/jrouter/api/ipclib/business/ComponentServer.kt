@@ -1,11 +1,11 @@
-package com.jj.haha.jrouter.api.lib.business
+package com.jj.haha.jrouter.api.ipclib.business
 
 import android.content.Context
 import android.os.IBinder
 import android.os.RemoteException
 import com.jj.haha.jrouter.api.IDispatcher
 import com.jj.haha.jrouter.api.bean.BinderBean
-import com.jj.haha.jrouter.api.lib.utils.ProcessUtils
+import com.jj.haha.jrouter.api.ipclib.utils.ProcessUtils
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -19,11 +19,11 @@ class ComponentServer {
         serviceCanonicalName: String,
         stubBinder: IBinder,
         context: Context,
-        dispatcher: IDispatcher
+        dispatcher: IDispatcher?
     ) {
         stubBinderCache[serviceCanonicalName] = stubBinder
         try {
-            dispatcher.registerRemoteService(
+            dispatcher?.registerRemoteService(
                 serviceCanonicalName,
                 ProcessUtils.getProcessName(context),
                 stubBinder
@@ -33,9 +33,10 @@ class ComponentServer {
         }
     }
 
-    fun unregisterStubService(serviceCanonicalName: String, dispatcher: IDispatcher) {
+    fun unregisterStubService(serviceCanonicalName: String, dispatcher: IDispatcher?) {
+        clearStubBinderCache(serviceCanonicalName)
         try {
-            dispatcher.unregisterRemoteService(serviceCanonicalName)
+            dispatcher?.unregisterRemoteService(serviceCanonicalName)
         } catch (e: RemoteException) {
             e.printStackTrace()
         }
@@ -52,9 +53,9 @@ class ComponentServer {
         return null
     }
 
-    fun getRemoteBinder(serviceCanonicalName: String, dispatcher: IDispatcher): BinderBean? {
+    fun getRemoteBinder(serviceCanonicalName: String, dispatcher: IDispatcher?): BinderBean? {
         try {
-            val binderBean = dispatcher.getTargetBinder(serviceCanonicalName) ?: return null
+            val binderBean = dispatcher?.getTargetBinder(serviceCanonicalName) ?: return null
             try {
                 binderBean.binder.linkToDeath({
                     remoteBinderCache.remove(serviceCanonicalName)

@@ -1,8 +1,8 @@
-package com.jj.haha.jrouter.api.lib.utils
+package com.jj.haha.jrouter.api.ipclib.utils
 
 import android.content.Context
 import android.content.Intent
-import com.jj.haha.jrouter.api.lib.utils.ProcessUtils.getProcessName
+import com.jj.haha.jrouter.api.ipclib.utils.ProcessUtils.getProcessName
 
 object StubServiceMatcher {
     /**

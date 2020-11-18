@@ -1,4 +1,4 @@
-package com.jj.haha.jrouter.api.lib
+package com.jj.haha.jrouter.api.ipclib
 
 import android.os.IBinder
 import android.os.Parcel

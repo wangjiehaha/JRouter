@@ -1,16 +1,16 @@
-package com.jj.haha.jrouter.api.lib.dispatcher
+package com.jj.haha.jrouter.api.ipclib.dispatcher
 
 import android.os.IBinder
 import com.jj.haha.jrouter.api.IDispatcher
 import com.jj.haha.jrouter.api.bean.BinderBean
-import com.jj.haha.jrouter.api.lib.business.RemoteBridge
-import com.jj.haha.jrouter.api.lib.dispatcher.event.EventDispatcher
-import com.jj.haha.jrouter.api.lib.dispatcher.service.ServiceDispatcher
+import com.jj.haha.jrouter.api.ipclib.business.DispatcherBridge
+import com.jj.haha.jrouter.api.ipclib.dispatcher.event.EventDispatcher
+import com.jj.haha.jrouter.api.ipclib.dispatcher.service.ServiceDispatcher
 
 /**
  * [Dispatcher] in main process or steady process, every module communicate by [Dispatcher]
  *
- * Dispatcher cache module Binder(provide services) and cache [RemoteBridge]
+ * Dispatcher cache module Binder(provide services) and cache [DispatcherBridge]
  */
 object Dispatcher: IDispatcher.Stub() {
 
@@ -25,6 +25,7 @@ object Dispatcher: IDispatcher.Stub() {
 
     override fun unregisterRemoteService(serviceCanonicalName: String) {
         serviceDispatcher.removeBinderCacheLocked(serviceCanonicalName)
+        eventDispatcher.unregisterRemoteServiceLocked(serviceCanonicalName)
     }
 
     override fun getTargetBinder(serviceCanonicalName: String): BinderBean? {

@@ -1,4 +1,4 @@
-package com.jj.haha.jrouter.api.lib.dispatcher.service
+package com.jj.haha.jrouter.api.ipclib.dispatcher.service
 
 import android.os.IBinder
 import com.jj.haha.jrouter.api.Router

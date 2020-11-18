@@ -1,4 +1,4 @@
-package com.jj.haha.jrouter.api.lib.dispatcher
+package com.jj.haha.jrouter.api.ipclib.dispatcher
 
 import android.content.ContentProvider
 import android.content.ContentValues
@@ -8,7 +8,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
 import android.os.RemoteException
-import com.jj.haha.jrouter.api.lib.BinderWrapper
+import com.jj.haha.jrouter.api.ipclib.BinderWrapper
 import java.util.concurrent.ConcurrentHashMap
 
 class DispatcherProvider: ContentProvider() {

@@ -1,4 +1,4 @@
-package com.jj.haha.jrouter.api.lib.business
+package com.jj.haha.jrouter.api.ipclib.business
 
 import android.content.Intent
 import android.database.Cursor
@@ -6,30 +6,30 @@ import android.net.Uri
 import android.os.IBinder
 import android.os.RemoteException
 import com.jj.haha.jrouter.api.*
+import com.jj.haha.jrouter.api.bean.BinderBean
 import com.jj.haha.jrouter.api.bean.Event
-import com.jj.haha.jrouter.api.lib.BinderWrapper
-import com.jj.haha.jrouter.api.lib.dispatcher.DispatcherCursor
-import com.jj.haha.jrouter.api.lib.dispatcher.DispatcherProvider
-import com.jj.haha.jrouter.api.lib.dispatcher.DispatcherService
-import com.jj.haha.jrouter.api.lib.utils.IOUtils
-import com.jj.haha.jrouter.api.lib.utils.ServiceUtils
-import com.jj.haha.jrouter.api.lib.dispatcher.Dispatcher
+import com.jj.haha.jrouter.api.ipclib.BinderWrapper
+import com.jj.haha.jrouter.api.ipclib.dispatcher.DispatcherCursor
+import com.jj.haha.jrouter.api.ipclib.dispatcher.DispatcherProvider
+import com.jj.haha.jrouter.api.ipclib.dispatcher.DispatcherService
+import com.jj.haha.jrouter.api.ipclib.utils.IOUtils
+import com.jj.haha.jrouter.api.ipclib.utils.ServiceUtils
+import com.jj.haha.jrouter.api.ipclib.dispatcher.Dispatcher
 
 /**
- * 联通模块与中心binder分配器的桥梁
+ * 联通模块(本地进程)与中心binder分配器的桥梁
  *
- * [RemoteBridge] has [Dispatcher];
- * [Dispatcher] has [RemoteBridge];
- * [RemoteBridge] also can notify event (实现了跨进程的事件总线)
+ * [DispatcherBridge] has [Dispatcher];
+ * [Dispatcher] has [DispatcherBridge];
+ * [DispatcherBridge] also can notify event (实现了跨进程的事件总线)
  *
- * Remote service(provider) can get [Dispatcher] by [RemoteBridge];
+ * Remote service(provider) can get [Dispatcher] by [DispatcherBridge];
  *
  */
-object RemoteBridge : IRemoteBridge.Stub() {
-
-    const val MAX_WAIT_TIME = 600L
+object DispatcherBridge : IRemoteBridge.Stub() {
 
     private var dispatcherPoxy: IDispatcher? = null
+    private val componentServer = ComponentServer();
 
     @Synchronized
     private fun requestDispatcherBinder() {
@@ -91,8 +91,39 @@ object RemoteBridge : IRemoteBridge.Stub() {
         return Uri.parse("content://" + Router.getAppContext().packageName + "." + DispatcherProvider.URI_SUFFIX + "/main")
     }
 
-    override fun unregisterRemoteService(serviceCanonicalName: String?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    /**
+     * 由[Dispatcher]主动调用
+     * 因为[Dispatcher]已经移除了Binder，所以也需要通知到各个组件业务的进程将自身缓存的远程Binder移除
+     */
+    override fun unregisterRemoteService(serviceCanonicalName: String) {
+        componentServer.clearRemoteBinderCache(serviceCanonicalName)
+    }
+
+    @Synchronized
+    fun getRemoteServiceBean(serviceCanonicalName: String): BinderBean? {
+        val cacheBinderBean =
+            componentServer.getIBinderFromCache(Router.getAppContext(), serviceCanonicalName)
+        if (cacheBinderBean != null) {
+            return cacheBinderBean
+        }
+        initDispatchProxyLocked()
+        return componentServer.getRemoteBinder(serviceCanonicalName, dispatcherPoxy)
+    }
+
+    @Synchronized
+    fun registerStubService(serviceCanonicalName: String, iBinder: IBinder) {
+        initDispatchProxyLocked()
+        componentServer.registerStubService(
+            serviceCanonicalName,
+            iBinder,
+            Router.getAppContext(),
+            dispatcherPoxy!!
+        )
+    }
+
+    fun unregisterStubService(serviceCanonicalName: String) {
+        initDispatchProxyLocked()
+        componentServer.unregisterStubService(serviceCanonicalName, dispatcherPoxy)
     }
 
     /**

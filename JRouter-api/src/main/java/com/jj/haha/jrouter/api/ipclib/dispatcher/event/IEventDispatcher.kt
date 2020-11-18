@@ -1,4 +1,4 @@
-package com.jj.haha.jrouter.api.lib.dispatcher.event
+package com.jj.haha.jrouter.api.ipclib.dispatcher.event
 
 import android.os.IBinder
 import android.os.RemoteException
