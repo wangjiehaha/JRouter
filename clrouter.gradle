@@ -1,0 +1,6 @@
+apply plugin: 'kotlin-kapt'
+dependencies {
+    kapt "com.jj.haha:compiler:1.0.0"
+    implementation "com.jj.haha:annotation:1.0.0"
+    implementation "com.jj.haha:api:1.0.0"
+}

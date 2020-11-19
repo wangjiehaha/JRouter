@@ -1,0 +1,37 @@
+ext {
+    SDK_SUFFIX = "-sdk"
+    addDependencies = this.&addDependencies
+    apiSdk = this.&apiSdk
+}
+
+/**
+ * 添加子项目依赖，在编辑代码时期只依赖sdk模块，最终需要打包时再讲真正包含实现业务逻辑的代码编译进apk中
+ * @param projectName 项目名称
+ * @param excludeClosure 如果需要额外进行配置，传入该闭包
+ * @return
+ */
+def addDependencies(String projectName, Closure excludeClosure) {
+    project.dependencies {
+        if (excludeClosure == null) {
+            compileOnly project(":$projectName:${projectName}${SDK_SUFFIX}")
+            runtimeOnly project(":$projectName")
+        } else {
+            compileOnly(project(":$projectName:${projectName}${SDK_SUFFIX}"), excludeClosure)
+            runtimeOnly(project(":$projectName"), excludeClosure)
+        }
+    }
+}
+
+def addDependencies(String projectName) {
+    addDependencies(projectName, null)
+}
+
+/**
+ * 引用sdk模块时使用该函数，按照规定的sdk命名方式添加依赖
+ * @return
+ */
+def apiSdk() {
+    project.dependencies {
+        api project(":${project.path}:$project.name$SDK_SUFFIX")
+    }
+}

@@ -1,0 +1,14 @@
+apply from: rootProject.projectDir.path + "/subproject/subproject.app.gradle"
+
+android {
+
+    defaultConfig {
+        if (isModule.toBoolean()) {
+            applicationId "com.cv.led.mobileserver"
+        }
+    }
+}
+
+dependencies {
+    apiSdk()
+}

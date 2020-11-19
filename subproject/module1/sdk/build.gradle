@@ -1,0 +1,1 @@
+apply from: rootProject.projectDir.path + "/subproject/subproject.sdk.gradle"

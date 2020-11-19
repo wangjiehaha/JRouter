@@ -1,3 +1,5 @@
+apply from: './extend.gradle'
+
 rootProject.name='JRouter'
 include ':app'
 include ':JRouter-annotation'
@@ -5,3 +7,10 @@ include ':JRouter-compiler'
 include ':JRouter-api'
 include ':JRouter-api'
 include ':JRouter-plugin'
+
+file('subproject').eachDir { dir ->
+    include dir.name
+    project(":${dir.name}").projectDir = new File("${dir.path}/app")
+    include "${dir.name}:${dir.name}$SDK_SUFFIX"
+    project(":${dir.name}:${dir.name}$SDK_SUFFIX").projectDir = new File("${dir.path}/sdk")
+}
