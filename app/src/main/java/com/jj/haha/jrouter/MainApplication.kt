@@ -1,12 +1,8 @@
 package com.jj.haha.jrouter
 
-import android.app.Application
-import com.jj.haha.jrouter.api.Router
+import com.jj.haha.jrouter.api.BaseRouterApplication
 
-class MainApplication: Application() {
+class MainApplication: BaseRouterApplication() {
 
-    override fun onCreate() {
-        super.onCreate()
-        Router.lazyInit(this)
-    }
+
 }
