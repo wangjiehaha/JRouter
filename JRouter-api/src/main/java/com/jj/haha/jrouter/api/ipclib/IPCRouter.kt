@@ -1,10 +1,14 @@
 package com.jj.haha.jrouter.api.ipclib
 
+import android.content.Context
+import android.content.Intent
 import android.os.IBinder
 import com.jj.haha.jrouter.annotation.RouterService
 import com.jj.haha.jrouter.api.ipclib.business.DispatcherBridge
 import com.jj.haha.jrouter.api.ipclib.dispatcher.Dispatcher
 import com.jj.haha.jrouter.api.Router
+import com.jj.haha.jrouter.api.ipclib.dispatcher.DispatcherService
+import com.jj.haha.jrouter.api.ipclib.utils.ServiceUtils
 
 /**
  * 对于跨进程的服务可以通过[IPCRouter]注册到[Dispatcher]中去；
@@ -23,6 +27,11 @@ import com.jj.haha.jrouter.api.Router
  * 这样可以实现 app 完全隐藏自身的功能实现，实现解耦
  */
 object IPCRouter {
+
+    fun init(context: Context) {
+        val intent = Intent(context, DispatcherService::class.java)
+        ServiceUtils.startServiceSafely(context, intent)
+    }
 
     /**
      * 注册远程服务，需要在自身（远程服务）的进程中注册

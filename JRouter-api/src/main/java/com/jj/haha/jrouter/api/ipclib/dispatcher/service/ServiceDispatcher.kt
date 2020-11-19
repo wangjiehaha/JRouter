@@ -6,7 +6,6 @@ import com.jj.haha.jrouter.api.bean.BinderBean
 import java.util.concurrent.ConcurrentHashMap
 
 class ServiceDispatcher : IServiceDispatcher {
-    private val emergencyHandler = EmergencyHandler()
     private val remoteBinderCache = ConcurrentHashMap<String, BinderBean>()
 
     override fun getTargetBinderLocked(serviceCanonicalName: String): BinderBean? {
@@ -18,12 +17,6 @@ class ServiceDispatcher : IServiceDispatcher {
         processName: String,
         binder: IBinder
     ) {
-        binder.linkToDeath({
-            val bean = remoteBinderCache.remove(serviceCanonicalName)
-            if (bean != null) {
-                emergencyHandler.handleBinderDied(Router.getAppContext(), bean.processName)
-            }
-        }, 0)
         remoteBinderCache[serviceCanonicalName] = BinderBean(binder, processName)
     }
 

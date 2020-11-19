@@ -6,17 +6,20 @@ import android.util.Log;
 import com.jj.haha.jrouter.annotation.Const;
 import com.jj.haha.jrouter.annotation.RouterProvider;
 import com.jj.haha.jrouter.annotation.ServiceImpl;
+import com.jj.haha.jrouter.api.ipclib.IPCRouter;
 import com.jj.haha.jrouter.api.service.IFactory;
 import com.jj.haha.jrouter.api.service.ServiceLoader;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Router {
 
     private final static String TAG = Router.class.getSimpleName();
     private static Context appContext;
+    private static AtomicBoolean initFlag = new AtomicBoolean(false);
 
     public static Context getAppContext(){
         return appContext;
@@ -28,8 +31,13 @@ public class Router {
      * 本方法线程安全。
      */
     public static void lazyInit(Context context) {
+        if (initFlag.get() || context == null) {
+            return;
+        }
         appContext = context.getApplicationContext();
+        IPCRouter.INSTANCE.init(context);
         ServiceLoader.lazyInit();
+        initFlag.set(true);
     }
 
     /**
