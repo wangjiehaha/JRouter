@@ -15,7 +15,7 @@ class DispatcherProvider: ContentProvider() {
 
     companion object {
         val PROJECTION_MAIN = Array(1){"main"}
-        const val URI_SUFFIX = "jrouter.api.lib.dispatcher"
+        const val URI_SUFFIX = "api.lib.dispatcher"
     }
 
     override fun insert(p0: Uri, p1: ContentValues?): Uri? {
@@ -54,6 +54,10 @@ class DispatcherCursor(columnNames: Array<out String>?, binder: IBinder) : Matri
 
     init {
         binderExtras.putParcelable(KEY_BINDER_WRAPPER, BinderWrapper(binder))
+    }
+
+    override fun getExtras(): Bundle {
+        return binderExtras
     }
 
     companion object {
