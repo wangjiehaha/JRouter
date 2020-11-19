@@ -1,6 +1,5 @@
 package com.jj.haha.jrouter.plugin
 
-import com.android.apksig.internal.jar.ManifestParser
 import com.android.build.gradle.AppExtension
 import groovy.xml.MarkupBuilder
 import org.gradle.api.Project
@@ -13,13 +12,12 @@ class StubServiceGenerator implements IServiceGenerator {
     def static final ENABLED = 'android:enabled'
     def static final FALSE = 'false'
     def static final TRUE = 'true'
-    def static final STUB_SERVICE = 'org.qiyi.video.svg.stub.CommuStubService$CommuStubService'
 
     def static final AUTHORITIES = "android:authorities"
-    def static final DISPATCHER_AUTHORITY = "qiyi.svg.dispatcher"
+    def static final DISPATCHER_AUTHORITY = "api.lib.dispatcher"
 
-    def static final DISPATCHER_SERVICE = 'org.qiyi.video.svg.dispatcher.DispatcherService'
-    def static final DISPTACHER_PROVIDER = 'org.qiyi.video.svg.dispatcher.DispatcherProvider'
+    def static final DISPATCHER_SERVICE = 'com.jj.haha.jrouter.api.ipclib.dispatcher.DispatcherService'
+    def static final DISPATCHER_PROVIDER = 'com.jj.haha.jrouter.api.ipclib.dispatcher.DispatcherProvider'
 
     def public static final MATCH_DIR = "build"
     def public static final MATCH_FILE_NAME = "match_stub.txt"
@@ -51,11 +49,7 @@ class StubServiceGenerator implements IServiceGenerator {
                 }
 
                 variant.outputs.each { output ->
-
                     output.processManifest.doLast {
-
-                        println "manifestOutputDirectory:" + output.processManifest.manifestOutputDirectory.absolutePath
-
                         //output.getProcessManifest().manifestOutputDirectory
                         output.processManifest.outputs.files.each { File file ->
                             //在gradle plugin 3.0.0之前，file是文件，且文件名为AndroidManifest.xml
@@ -99,7 +93,7 @@ class StubServiceGenerator implements IServiceGenerator {
         }
     }
 
-    def getPackageName(variant) {
+    static def getPackageName(variant) {
         if (null == variant) {
             return null
         }
@@ -112,32 +106,10 @@ class StubServiceGenerator implements IServiceGenerator {
     }
     //注意:闭包中只能调用static方法
     private String addServiceItem(String manifestPath) {
-        ManifestParser manifestParser = new ManifestParser()
-        Set<String> customProcessNames = manifestParser.getCustomProcessNames(manifestPath)
-
         def writer = new StringWriter()
         def xml = new MarkupBuilder(writer)
 
         xml.application {
-
-            int index = 0
-            customProcessNames.each {
-
-                String serviceName = "${STUB_SERVICE}" + index.toString()
-
-                service("${NAME}": serviceName,
-                        "${ENABLED}": "${TRUE}",
-                        "${EXPORTED}": "${FALSE}",
-                        "${PROCESS}": it
-                )
-
-                if (matchedServices == null) {
-                    matchedServices = new HashMap<>()
-                }
-                matchedServices.put(it, serviceName)
-
-                ++index
-            }
 
             //之后，写入DispatcherService和DispatcherProvider
             def dispatcherProcess = dispatcher.process
@@ -152,7 +124,7 @@ class StubServiceGenerator implements IServiceGenerator {
                 provider(
                         "${AUTHORITIES}": getAuthority(),
                         "${EXPORTED}": "${FALSE}",
-                        "${NAME}": DISPTACHER_PROVIDER,
+                        "${NAME}": DISPATCHER_PROVIDER,
                         "${ENABLED}": "${TRUE}",
                         "${PROCESS}": dispatcherProcess
                 )
@@ -166,7 +138,7 @@ class StubServiceGenerator implements IServiceGenerator {
                 provider(
                         "${AUTHORITIES}": getAuthority(),
                         "${EXPORTED}": "${FALSE}",
-                        "${NAME}": DISPTACHER_PROVIDER,
+                        "${NAME}": DISPATCHER_PROVIDER,
                         "${ENABLED}": "${TRUE}"
                 )
 
