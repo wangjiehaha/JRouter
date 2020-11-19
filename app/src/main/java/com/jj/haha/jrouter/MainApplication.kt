@@ -1,6 +1,6 @@
 package com.jj.haha.jrouter
 
-import com.jj.haha.jrouter.api.BaseRouterApplication
+import com.jwhaha.jrouter.api.BaseRouterApplication
 
 class MainApplication: BaseRouterApplication() {
 

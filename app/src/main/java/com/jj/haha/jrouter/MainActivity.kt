@@ -4,7 +4,7 @@ import android.app.Activity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import com.jj.haha.jrouter.api.Router
+import com.jwhaha.jrouter.api.Router
 import com.test.module.sdk.MODULE1_KEY
 import com.test.module.sdk.ModuleApi
 

@@ -3,7 +3,7 @@ package com.test.module
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import com.jj.haha.jrouter.api.ipclib.IPCRouter
+import com.jwhaha.jrouter.api.ipclib.IPCRouter
 import com.test.module.sdk.IBuy
 
 class BuyService: Service() {

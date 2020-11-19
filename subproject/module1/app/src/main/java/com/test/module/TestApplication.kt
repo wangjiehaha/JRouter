@@ -1,7 +1,7 @@
 package com.test.module
 
 import android.content.Intent
-import com.jj.haha.jrouter.api.BaseRouterApplication
+import com.jwhaha.jrouter.api.BaseRouterApplication
 
 class TestApplication: BaseRouterApplication() {
 

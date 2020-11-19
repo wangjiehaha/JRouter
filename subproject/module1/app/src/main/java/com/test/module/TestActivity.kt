@@ -3,7 +3,7 @@ package com.test.module
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import com.jj.haha.jrouter.api.ipclib.utils.ServiceUtils
+import com.jwhaha.jrouter.api.ipclib.utils.ServiceUtils
 
 class TestActivity: Activity() {
 

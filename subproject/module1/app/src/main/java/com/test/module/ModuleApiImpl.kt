@@ -1,7 +1,7 @@
 package com.test.module
 
-import com.jj.haha.jrouter.annotation.RouterService
-import com.jj.haha.jrouter.api.ipclib.IPCRouter
+import com.jwhaha.jrouter.annotation.RouterService
+import com.jwhaha.jrouter.api.ipclib.IPCRouter
 import com.test.module.sdk.IBuy
 import com.test.module.sdk.MODULE1_KEY
 import com.test.module.sdk.ModuleApi
