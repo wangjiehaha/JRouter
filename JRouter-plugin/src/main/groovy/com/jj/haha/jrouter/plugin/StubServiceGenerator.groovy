@@ -27,7 +27,6 @@ class StubServiceGenerator implements IServiceGenerator {
     private String rootDirPath
     def dispatcher
     private String pkgName
-    private String provider
 
     @Override
     void injectStubServiceToManifest(Project project) {
@@ -39,7 +38,6 @@ class StubServiceGenerator implements IServiceGenerator {
         AppExtension android = project.extensions.getByType(AppExtension)
 
         this.dispatcher = project.extensions.getByType(DispatcherExtension)
-        provider =
 
 
         project.afterEvaluate {
