@@ -55,7 +55,7 @@ open class BaseRouterApplication: Application() {
         }
     }
 
-    private fun isMainProcess(): Boolean {
+    fun isMainProcess(): Boolean {
         val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val runningApps = am.runningAppProcesses
         val pid = android.os.Process.myPid()
