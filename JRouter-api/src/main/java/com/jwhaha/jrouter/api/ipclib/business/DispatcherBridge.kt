@@ -5,6 +5,7 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.IBinder
 import android.os.RemoteException
+import android.util.Log
 import com.jwhaha.jrouter.api.*
 import com.jwhaha.jrouter.api.bean.BinderBean
 import com.jwhaha.jrouter.api.ipclib.BinderWrapper
@@ -14,6 +15,7 @@ import com.jwhaha.jrouter.api.ipclib.dispatcher.DispatcherService
 import com.jwhaha.jrouter.api.ipclib.utils.IOUtils
 import com.jwhaha.jrouter.api.ipclib.utils.ServiceUtils
 import com.jwhaha.jrouter.api.ipclib.dispatcher.Dispatcher
+import java.lang.Exception
 
 /**
  * 联通模块(本地进程)与中心binder分配器的桥梁
@@ -27,18 +29,20 @@ import com.jwhaha.jrouter.api.ipclib.dispatcher.Dispatcher
  */
 object DispatcherBridge : IRemoteBridge.Stub() {
 
+    private const val MAX_WAIT_TIME = 600L
     private var dispatcherPoxy: IDispatcher? = null
-    private val componentServer = ComponentServer();
+    private val componentServer = ComponentServer()
+    private val lock = Object()
 
     @Synchronized
     private fun requestDispatcherBinder() {
         if (dispatcherPoxy == null) {
             val wrapper = BinderWrapper(this.asBinder())
-            Intent(com.jwhaha.jrouter.api.Router.getAppContext(), DispatcherService::class.java).apply {
+            Intent(Router.getAppContext(), DispatcherService::class.java).apply {
                 action = DISPATCH_REGISTER_SERVICE_ACTION
-                putExtra(KEY_REMOTE_TRANSFER_WRAPPER, wrapper)
+                putExtra(KEY_DISPATCH_BRIDGE_WRAPPER, wrapper)
                 putExtra(KEY_PID, android.os.Process.myPid())
-                ServiceUtils.startServiceSafely(com.jwhaha.jrouter.api.Router.getAppContext(), this)
+                ServiceUtils.startServiceSafely(Router.getAppContext(), this)
             }
         }
     }
@@ -55,7 +59,17 @@ object DispatcherBridge : IRemoteBridge.Stub() {
         // 从 provider 中获取失败，那么由dispatcher服务注入
         if (dispatcherPoxy == null) {
             requestDispatcherBinder()
-            // todo 这里需要考虑是否需要等待
+            synchronized(lock) {
+                try {
+                    val starTime = System.currentTimeMillis()
+                    lock.wait(MAX_WAIT_TIME)
+                    if ((System.currentTimeMillis() - starTime) >= MAX_WAIT_TIME) {
+                        Log.w("DispatcherBridge", "Wait dispatcherPoxy timeout.")
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
         }
     }
 
@@ -87,7 +101,7 @@ object DispatcherBridge : IRemoteBridge.Stub() {
     }
 
     private fun getDispatcherProviderUri(): Uri {
-        return Uri.parse("content://" + com.jwhaha.jrouter.api.Router.getAppContext().packageName + "." + DispatcherProvider.URI_SUFFIX + "/main")
+        return Uri.parse("content://" + Router.getAppContext().packageName + "." + DispatcherProvider.URI_SUFFIX + "/main")
     }
 
     /**
@@ -101,7 +115,7 @@ object DispatcherBridge : IRemoteBridge.Stub() {
     @Synchronized
     fun getRemoteServiceBean(serviceCanonicalName: String): BinderBean? {
         val cacheBinderBean =
-            componentServer.getIBinderFromCache(com.jwhaha.jrouter.api.Router.getAppContext(), serviceCanonicalName)
+            componentServer.getIBinderFromCache(Router.getAppContext(), serviceCanonicalName)
         if (cacheBinderBean != null) {
             return cacheBinderBean
         }
@@ -115,7 +129,7 @@ object DispatcherBridge : IRemoteBridge.Stub() {
         componentServer.registerStubService(
             serviceCanonicalName,
             iBinder,
-            com.jwhaha.jrouter.api.Router.getAppContext(),
+            Router.getAppContext(),
             dispatcherPoxy!!
         )
     }
@@ -134,6 +148,9 @@ object DispatcherBridge : IRemoteBridge.Stub() {
             dispatcherPoxy = null
         }, 0)
         dispatcherPoxy = IDispatcher.Stub.asInterface(dispatcherBinder)
+        synchronized(lock) {
+            lock.notifyAll()
+        }
     }
 
     override fun notify(event: com.jwhaha.jrouter.api.bean.Event?) {

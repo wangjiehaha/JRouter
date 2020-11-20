@@ -31,6 +31,8 @@ class DispatcherService : Service() {
     }
 
     private fun registerRemoteService(intent: Intent) {
+        val bridgeWrapper = intent.getParcelableExtra<BinderWrapper>(KEY_DISPATCH_BRIDGE_WRAPPER)
+        val pid = intent.getIntExtra(KEY_PID, -1)
         val businessWrapper = intent.getParcelableExtra<BinderWrapper>(KEY_BUSINESS_BINDER_WRAPPER)
         val serviceCanonicalName = intent.getStringExtra(KEY_SERVICE_NAME)
         val processName = intent.getStringExtra(KEY_PROCESS_NAME)
@@ -44,6 +46,10 @@ class DispatcherService : Service() {
             }
         } catch (e: RemoteException) {
             e.printStackTrace()
+        } finally {
+            if (bridgeWrapper != null) {
+                registerAndReverseRegister(pid, bridgeWrapper.binder)
+            }
         }
     }
 
@@ -53,6 +59,16 @@ class DispatcherService : Service() {
             serviceCanonicalName?.apply {
                 Dispatcher.unregisterRemoteService(this)
             }
+        } catch (e: RemoteException) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun registerAndReverseRegister(pid: Int, bridgeBinder: IBinder) {
+        val remoteBridge = IRemoteBridge.Stub.asInterface(bridgeBinder)
+        Dispatcher.registerRemoteBridge(pid, bridgeBinder)
+        try {
+            remoteBridge.registerDispatcher(Dispatcher.asBinder())
         } catch (e: RemoteException) {
             e.printStackTrace()
         }
