@@ -9,8 +9,8 @@ def BuildTime = new Date().format("MMdd", TimeZone.getTimeZone("GMT+08:00"))
 ext{
     android = [
             minSdkVersion : 25,
-            targetSdkVersion : 28,
-            compileSdkVersion : 28,
+            targetSdkVersion : 29,
+            compileSdkVersion : 29,
             versionCode : versionMajor * 10 + versionPatch * 1 + gitVersion,
             versionName : "${versionMajor}.${versionPatch}" + "." + gitVersion + "." + BuildTime + "_" + commit
     ]

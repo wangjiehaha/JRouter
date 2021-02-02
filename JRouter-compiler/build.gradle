@@ -13,7 +13,7 @@ dependencies {
     implementation 'com.google.auto.service:auto-service:1.0-rc7'
     annotationProcessor'com.google.auto.service:auto-service:1.0-rc7'
     implementation 'com.squareup:javapoet:1.8.0'
-    implementation "com.jj.haha:annotation:1.0.0"
+    implementation project(path: ':JRouter-annotation')
 }
 
 sourceCompatibility = "7"
