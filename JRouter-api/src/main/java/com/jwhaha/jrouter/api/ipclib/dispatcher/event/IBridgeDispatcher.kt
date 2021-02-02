@@ -3,7 +3,7 @@ package com.jwhaha.jrouter.api.ipclib.dispatcher.event
 import android.os.IBinder
 import android.os.RemoteException
 
-interface IEventDispatcher {
+interface IBridgeDispatcher {
     fun registerRemoteTransferLocked(pid: Int, remoteBridge: IBinder)
 
     @Throws(RemoteException::class)

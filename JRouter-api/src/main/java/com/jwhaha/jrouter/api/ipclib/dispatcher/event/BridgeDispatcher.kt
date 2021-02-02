@@ -5,7 +5,7 @@ import android.os.RemoteException
 import com.jwhaha.jrouter.api.IRemoteBridge
 import java.util.concurrent.ConcurrentHashMap
 
-class EventDispatcher : IEventDispatcher {
+class BridgeDispatcher : IBridgeDispatcher {
     private val dispatcherBridgeBinders: MutableMap<Int, IBinder> = ConcurrentHashMap()
 
     override fun registerRemoteTransferLocked(

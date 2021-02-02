@@ -4,7 +4,7 @@ import android.os.IBinder
 import com.jwhaha.jrouter.api.IDispatcher
 import com.jwhaha.jrouter.api.bean.BinderBean
 import com.jwhaha.jrouter.api.ipclib.business.DispatcherBridge
-import com.jwhaha.jrouter.api.ipclib.dispatcher.event.EventDispatcher
+import com.jwhaha.jrouter.api.ipclib.dispatcher.event.BridgeDispatcher
 import com.jwhaha.jrouter.api.ipclib.dispatcher.service.ServiceDispatcher
 
 /**
@@ -15,17 +15,17 @@ import com.jwhaha.jrouter.api.ipclib.dispatcher.service.ServiceDispatcher
 object Dispatcher: IDispatcher.Stub() {
 
     private val serviceDispatcher = ServiceDispatcher()
-    private val eventDispatcher = EventDispatcher()
+    private val bridgeDispatcher = BridgeDispatcher()
 
     override fun registerRemoteBridge(pid: Int, binder: IBinder) {
         if (pid >= 0) {
-            eventDispatcher.registerRemoteTransferLocked(pid, binder)
+            bridgeDispatcher.registerRemoteTransferLocked(pid, binder)
         }
     }
 
     override fun unregisterRemoteService(serviceCanonicalName: String) {
         serviceDispatcher.removeBinderCacheLocked(serviceCanonicalName)
-        eventDispatcher.unregisterRemoteServiceLocked(serviceCanonicalName)
+        bridgeDispatcher.unregisterRemoteServiceLocked(serviceCanonicalName)
     }
 
     override fun getTargetBinder(serviceCanonicalName: String): BinderBean? {

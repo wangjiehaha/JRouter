@@ -7,13 +7,13 @@ import android.content.res.Configuration
 
 open class BaseRouterApplication: Application() {
 
-    private lateinit var mAppCallbacks: MutableList<com.jwhaha.jrouter.api.IApplicationCallback>
+    private lateinit var mAppCallbacks: MutableList<IApplicationCallback>
 
     override fun attachBaseContext(base: Context?) {
         super.attachBaseContext(base)
         if (isMainProcess()) {
-            mAppCallbacks = com.jwhaha.jrouter.api.Router.getAllServices(
-                com.jwhaha.jrouter.api.IApplicationCallback::class.java
+            mAppCallbacks = Router.getAllServices(
+                IApplicationCallback::class.java
             )
             mAppCallbacks.forEach{ it.attachBaseContext(this) }
         }
@@ -21,7 +21,7 @@ open class BaseRouterApplication: Application() {
 
     override fun onCreate() {
         super.onCreate()
-        com.jwhaha.jrouter.api.Router.lazyInit(this)
+        Router.lazyInit(this)
         if (isMainProcess()) {
             mAppCallbacks.forEach { it.onCreate() }
         }
