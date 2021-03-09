@@ -4,7 +4,14 @@ import com.google.auto.service.AutoService;
 import com.jwhaha.jrouter.annotation.Const;
 import com.jwhaha.jrouter.annotation.RouterService;
 import com.jwhaha.jrouter.annotation.ServiceImpl;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,6 +25,7 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.MirroredTypesException;
 import javax.lang.model.type.TypeMirror;
@@ -172,6 +180,62 @@ public class ServiceAnnotationProcessor extends BaseProcessor {
                 list.add(impl.toConfig());
             }
             return list;
+        }
+    }
+
+    public static class ServiceInitClassBuilder {
+
+        private final String className;
+        private final CodeBlock.Builder builder;
+        private final ClassName serviceLoaderClass;
+
+        public ServiceInitClassBuilder(String className) {
+            this.className = className;
+            this.builder = CodeBlock.builder();
+            System.out.println("typeElement(className) = " + typeElement(Const.SERVICE_LOADER_CLASS));
+            this.serviceLoaderClass = className(Const.SERVICE_LOADER_CLASS);
+        }
+
+        public ServiceInitClassBuilder put(String interfaceName, String key, String implementName, boolean singleton, boolean canRegister) {
+            builder.addStatement("$T.put($T.class, $S, $T.class, $L, $L)",
+                    serviceLoaderClass,
+                    className(interfaceName),
+                    key,
+                    className(implementName),
+                    singleton,
+                    canRegister);
+            return this;
+        }
+
+        public ServiceInitClassBuilder putDirectly(String interfaceName, String key, String implementName, boolean singleton, boolean canRegister) {
+            builder.addStatement("$T.put($T.class, $S, $L.class, $L, $L)",
+                    serviceLoaderClass,
+                    className(interfaceName),
+                    key,
+                    implementName,
+                    singleton,
+                    canRegister);
+            return this;
+        }
+
+        public void build() {
+            MethodSpec methodSpec = MethodSpec.methodBuilder(Const.INIT_METHOD)
+                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                    .returns(TypeName.VOID)
+                    .addCode(this.builder.build())
+                    .build();
+
+            TypeSpec typeSpec = TypeSpec.classBuilder(this.className)
+                    .addModifiers(Modifier.PUBLIC)
+                    .addMethod(methodSpec)
+                    .build();
+            try {
+                JavaFile.builder(Const.GEN_PKG_SERVICE, typeSpec)
+                        .build()
+                        .writeTo(filer);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }
