@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService;
 import com.jwhaha.jrouter.annotation.Const;
 import com.jwhaha.jrouter.annotation.RouterService;
 import com.jwhaha.jrouter.annotation.ServiceImpl;
+import com.jwhaha.jrouter.compiler.utils.AnnotationUtil;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
@@ -30,8 +31,11 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.MirroredTypesException;
 import javax.lang.model.type.TypeMirror;
 
+import static com.jwhaha.jrouter.compiler.utils.AnnotationUtil.getClassName;
+import static com.jwhaha.jrouter.compiler.utils.AnnotationUtil.isConcreteSubType;
+
 @AutoService(Processor.class)
-@SupportedSourceVersion(SourceVersion.RELEASE_7)
+@SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class ServiceAnnotationProcessor extends BaseProcessor {
 
     private final HashMap<String, Entity> mEntityMap = new HashMap<>();
@@ -51,7 +55,7 @@ public class ServiceAnnotationProcessor extends BaseProcessor {
         System.out.println("=========== Begin collect Annotations ==========");
         for (Element element : env.getElementsAnnotatedWith(RouterService.class)) {
             if (mHash == null) {
-                mHash = hash(getClassName(element.asType()));
+                mHash = AnnotationUtil.hash(getClassName(element.asType()));
             }
 
             RouterService service = element.getAnnotation(RouterService.class);
@@ -72,7 +76,7 @@ public class ServiceAnnotationProcessor extends BaseProcessor {
                     if (mirror == null) {
                         continue;
                     }
-                    if (!isConcreteSubType(element, mirror)) {
+                    if (!isConcreteSubType(element, mirror, types)) {
                         String msg = getClassName(element.asType()) + " no implementation annotations " + RouterService.class.getName()
                                 + " annotated interface " + mirror.toString();
                         throw new RuntimeException(msg);
@@ -109,23 +113,43 @@ public class ServiceAnnotationProcessor extends BaseProcessor {
     }
 
     private void generateInitClass() {
-        System.out.println("mEntityMap size " + mEntityMap.size() + ", mHash " + mHash);
         if (mEntityMap.isEmpty() || mHash == null) {
             return;
         }
-        ServiceInitClassBuilder generator = new ServiceInitClassBuilder("ServiceInit" + Const.SPLITTER + mHash);
+        final String className = "ServiceInit" + Const.SPLITTER + mHash;
+        final CodeBlock.Builder builder = CodeBlock.builder();
+        final ClassName serviceLoaderClass = AnnotationUtil.className(Const.SERVICE_LOADER_CLASS, elements);
+
         for (Map.Entry<String, Entity> entry : mEntityMap.entrySet()) {
             for (ServiceImpl service : entry.getValue().getMap().values()) {
                 boolean canRegister = entry.getValue().getCanRegisterMap().get(service);
-                generator.put(entry.getKey(), service.getKey(), service.getImplementation(), service.isSingleton(), canRegister);
-
-                System.out.println("entry.getKey() = " + entry.getKey() + ", service.getKey() = " + service.getKey()
-                        + ", service.getImplementation() = " + service.getImplementation()
-                        + ", service.getSingleton() = " + service.isSingleton()
-                        + ", canRegister = " + canRegister);
+                builder.addStatement(
+                        "$T.put($T.class, $S, $T.class, $L, $L)",
+                        serviceLoaderClass,
+                        AnnotationUtil.className(entry.getKey(), elements),
+                        service.getKey(),
+                        AnnotationUtil.className(service.getImplementation(), elements),
+                        service.isSingleton(),
+                        canRegister
+                );
             }
         }
-        generator.build();
+        MethodSpec methodSpec = MethodSpec.methodBuilder(Const.INIT_METHOD)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(TypeName.VOID)
+                .addCode(builder.build())
+                .build();
+        TypeSpec typeSpec = TypeSpec.classBuilder(className)
+                .addModifiers(Modifier.PUBLIC)
+                .addMethod(methodSpec)
+                .build();
+        try {
+            JavaFile.builder(Const.GEN_PKG_SERVICE, typeSpec)
+                    .build()
+                    .writeTo(filer);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static List<? extends TypeMirror> getInterface(RouterService service) {
@@ -171,70 +195,6 @@ public class ServiceAnnotationProcessor extends BaseProcessor {
             mCanRegisterMap.put(impl, canRegister);
             if (errorMsg != null) {
                 throw new RuntimeException(errorMsg);
-            }
-        }
-
-        public List<String> getContents() {
-            List<String> list = new ArrayList<>();
-            for (ServiceImpl impl : mMap.values()) {
-                list.add(impl.toConfig());
-            }
-            return list;
-        }
-    }
-
-    public static class ServiceInitClassBuilder {
-
-        private final String className;
-        private final CodeBlock.Builder builder;
-        private final ClassName serviceLoaderClass;
-
-        public ServiceInitClassBuilder(String className) {
-            this.className = className;
-            this.builder = CodeBlock.builder();
-            System.out.println("typeElement(className) = " + typeElement(Const.SERVICE_LOADER_CLASS));
-            this.serviceLoaderClass = className(Const.SERVICE_LOADER_CLASS);
-        }
-
-        public ServiceInitClassBuilder put(String interfaceName, String key, String implementName, boolean singleton, boolean canRegister) {
-            builder.addStatement("$T.put($T.class, $S, $T.class, $L, $L)",
-                    serviceLoaderClass,
-                    className(interfaceName),
-                    key,
-                    className(implementName),
-                    singleton,
-                    canRegister);
-            return this;
-        }
-
-        public ServiceInitClassBuilder putDirectly(String interfaceName, String key, String implementName, boolean singleton, boolean canRegister) {
-            builder.addStatement("$T.put($T.class, $S, $L.class, $L, $L)",
-                    serviceLoaderClass,
-                    className(interfaceName),
-                    key,
-                    implementName,
-                    singleton,
-                    canRegister);
-            return this;
-        }
-
-        public void build() {
-            MethodSpec methodSpec = MethodSpec.methodBuilder(Const.INIT_METHOD)
-                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .returns(TypeName.VOID)
-                    .addCode(this.builder.build())
-                    .build();
-
-            TypeSpec typeSpec = TypeSpec.classBuilder(this.className)
-                    .addModifiers(Modifier.PUBLIC)
-                    .addMethod(methodSpec)
-                    .build();
-            try {
-                JavaFile.builder(Const.GEN_PKG_SERVICE, typeSpec)
-                        .build()
-                        .writeTo(filer);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
         }
     }
