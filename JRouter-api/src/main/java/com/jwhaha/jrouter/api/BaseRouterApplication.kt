@@ -17,6 +17,10 @@ open class BaseRouterApplication: Application() {
             )
             mAppCallbacks.forEach{ it.attachBaseContext(this) }
         }
+        mAppCallbacks = Router.getAllServices(
+            com.jwhaha.jrouter.api.IApplicationCallback::class.java
+        )
+        mAppCallbacks.forEach{ it.attachBaseContext(this) }
     }
 
     override fun onCreate() {
