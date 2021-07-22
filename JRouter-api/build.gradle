@@ -2,11 +2,17 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
-apply from: "../local.repository.gradle"
-uploadArchives{
-    repositories.mavenDeployer{
-        pom.artifactId = "api"
-        pom.version = "1.0.0"
+apply from: rootProject.projectDir.path + "/repository.gradle"
+def libVersion = '1.0.2-SNAPSHOT'
+def libId = "api"
+
+publishing {
+    publications {
+        mavenAar(MavenPublication){
+            version = libVersion
+            artifactId = libId
+            artifact("$buildDir/outputs/aar/JRouter-api-release.aar")
+        }
     }
 }
 
@@ -39,5 +45,5 @@ dependencies {
     testImplementation 'junit:junit:4.13.1'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
-    implementation project(path: ':JRouter-annotation')
+    implementation "com.github.jrouter:annotation:1.0.0-SNAPSHOT"
 }
