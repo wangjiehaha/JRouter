@@ -11,12 +11,6 @@ open class BaseRouterApplication: Application() {
 
     override fun attachBaseContext(base: Context?) {
         super.attachBaseContext(base)
-        if (isMainProcess()) {
-            mAppCallbacks = Router.getAllServices(
-                IApplicationCallback::class.java
-            )
-            mAppCallbacks.forEach{ it.attachBaseContext(this) }
-        }
         mAppCallbacks = Router.getAllServices(
             com.jwhaha.jrouter.api.IApplicationCallback::class.java
         )
